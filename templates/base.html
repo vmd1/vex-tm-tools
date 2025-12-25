@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!--
+  Base template for the application.
+  - Contains consolidated CSS (Tokyo Night Storm theme) so styles live with templates.
+  - Provides a header/nav that uses session to toggle links.
+  - Exposes `title` and `content` blocks for child templates to fill.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <title>{% block title %}{% endblock %} - Vex TM Manager Tools</title>
+
+  <!-- Consolidated Tokyo Night Storm CSS (kept here for simplicity and easy editing) -->
+  <style>
+  :root {
+      /* Tokyo Night Storm-inspired palette */
+      --bg: #0b1226;        /* deep navy */
+      --bg-2: #0f1724;      /* slightly lighter */
+      --surface: #111827;   /* cards / nav */
+      --fg: #cbd6f5;        /* soft bluish text */
+      --muted: #7b8396;     /* muted text */
+      --primary: #7aa2f7;   /* bright blue */
+      --secondary: #9d7cd8; /* purple accent */
+      --accent: #2ac3de;    /* cyan accent */
+      --danger: #f7768e;    /* pink/red */
+  }
+
+  /* Base page layout */
+  html,body{height:100%;}
+  body {
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.45;
+      margin: 0;
+      padding: 0;
+  }
+
+  /* Typographic scale */
+  h1,h2,h3,h4{color:var(--primary);margin:0 0 .5rem 0}
+  p, label, input, button {color:var(--fg)}
+  i {
+    margin-right: 2px;
+  }
+
+  /* Header / nav */
+  header{background: rgba(11,17,38,0.6); backdrop-filter: blur(6px); padding: 0 1rem;}
+  header nav{max-width:920px;margin:0 auto; display: flex; align-items: center;}
+  header ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;justify-content:center; flex-grow: 1;}
+  header li{display:inline-block}
+  header a{display:block;padding:16px 12px;text-decoration:none;color:var(--muted);border-bottom:2px solid transparent; transition: all 0.2s ease-in-out;}
+  header a:hover{color:var(--fg)}
+  header .active{color:var(--primary); border-bottom-color: var(--primary); font-weight: 600;}
+  header .home-icon.active { border-bottom-color: transparent; }
+
+  /* Dropdown for user menu */
+  .dropdown { position: relative; display: inline-block; }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--surface);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: .5rem;
+  }
+  .dropdown-content a {
+    color: var(--fg);
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    border-radius: 4px;
+    border-bottom: none;
+  }
+  .dropdown-content a:hover { background-color: rgba(122,162,247,0.06); }
+  .dropdown:hover .dropdown-content { display: block; }
+  .user-menu-wrapper { margin-left: auto; }
+
+  .dropdown-header {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .dropdown-divider {
+    height: 1px;
+    margin: .5rem 0;
+    overflow: hidden;
+    background-color: rgba(255,255,255,0.06);
+  }
+
+  /* Main content area */
+  main{max-width:920px;margin:2rem auto;padding:1.25rem}
+
+  /* Forms & Inputs */
+  form{background:rgba(255,255,255,0.02);padding:1rem;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; margin-bottom: .5rem; font-weight: 500; }
+
+  input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], input[type=search], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 0;
+    border-radius: 6px;
+    border: 1px solid var(--surface);
+    background: rgba(255,255,255,0.02);
+    color: var(--fg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.2);
+  }
+
+  /* Checkboxes */
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--surface);
+    margin: 0;
+    font: inherit;
+    color: currentColor;
+    width: 1.15em;
+    height: 1.15em;
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+  }
+  input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--primary);
+    transform-origin: bottom left;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  }
+  input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+
+  /* Buttons */
+  button, .btn {
+    background-color: var(--primary);
+    color: var(--bg);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+  button:hover, .btn:hover {
+    filter: brightness(1.1);
+  }
+  button:active, .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary { background-color: var(--surface); color: var(--fg); border: 1px solid var(--muted); }
+  .btn-danger, .cancelbtn { background: var(--danger); color: var(--bg); }
+  .but-row { display: flex; gap: .5rem; }
+
+  .muted{color:var(--muted);font-size:.95rem}
+
+  /* Card styles */
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  .card-header {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  /* List group styles */
+  .list-group {
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  .list-group-item {
+    position: relative;
+    display: block;
+    padding: .75rem 1.25rem;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .list-group-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Alerts and messages */
+  .alert{padding:10px 12px;border-radius:6px;margin-bottom:0.75rem}
+  .alert-error{background:linear-gradient(180deg, rgba(247,118,142,0.08), rgba(247,118,142,0.04));border:1px solid rgba(247,118,142,0.12);color:var(--danger)}
+
+  @media (max-width:600px){
+    header ul{flex-direction:column;align-items:stretch}
+    .but-row{flex-direction:column}
+    /* Smaller avatars on narrow screens */
+    img.avatar{width:120px;max-width:36%}
+  }
+  </style>
+
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <!--
+    Site header shared by all pages. It uses `session` to show auth links.
+    Keep markup minimal; presentation is handled by the consolidated CSS above.
+  -->
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="home-icon {{ 'active' if request.path == url_for('index') else '' }}" style="font-size: 1.5rem; padding-top: 14px; padding-bottom: 14px;"><i class="ri-home-line"></i></a>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" title="Rooms" style="font-size: 1.5rem; padding-top: 14px; padding-bottom: 14px;"><i class="ri-door-open-line"></i></a>
+        <div class="dropdown-content" id="room-management-dropdown">
+            {% if 'user' in session and session.user.role in ['admin', 'owner'] %}
+            <a href="{{ url_for('room_management') }}">Manage Rooms</a>
+            <div class="dropdown-divider"></div>
+            {% endif %}
+            <div class="dropdown-header">Open Room</div>
+            <div id="room-links-container">
+                <!-- Dynamic room links will be inserted here -->
+            </div>
+        </div>
+      </li>
+      {% if 'user' in session %}
+      <div class="dropdown">
+          <a href="#" class="dropdown-toggle" title="Tools" style="font-size: 1.5rem; padding-top: 14px; padding-bottom: 14px;"><i class="ri-tools-line"></i></a>
+          <div class="dropdown-content">
+              {% if session.user.role in ['admin', 'owner'] %}
+                <a href="{{ url_for('pause_controls') }}">Pause Controls</a>
+              {% endif %}
+              {% if session.user.role in ['admin', 'owner', 'av'] %}
+                <a href="{{ url_for('controls_page') }}">Manual Controls</a>
+              {% endif %}
+              {% if session.user.role in ['admin', 'owner'] %}
+                <a href="{{ url_for('event_simulator_page') }}">Event Simulator</a>
+              {% endif %}
+          </div>
+      </div>
+      {% if session.user.role in ['admin', 'owner'] %}
+      <div class="dropdown">
+          <a href="#" class="dropdown-toggle" title="Server" style="font-size: 1.5rem; padding-top: 14px; padding-bottom: 14px;"><i class="ri-server-line"></i></a>
+          <div class="dropdown-content">
+              <a href="{{ url_for('config_editor_page') }}">Configuration Editor</a>
+              <a href="{{ url_for('manage_users_page') }}">Manage Users</a>
+              <a href="{{ url_for('logs_page') }}">Server Logs</a>
+          </div>
+      </div>
+      {% endif %}
+      {% endif %}
+      <div class="user-menu-wrapper">
+        <div class="dropdown">
+          <a href="#" class="user-icon" style="font-size: 1.5rem; padding-top: 14px; padding-bottom: 14px;">
+            {% if 'user' in session and session.user.avatar %}
+              <img src="{{ session.user.avatar }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%;">
+            {% else %}
+              <i class="ri-account-circle-line"></i>
+            {% endif %}
+          </a>
+          <div class="dropdown-content">
+            {% if 'user' in session %}
+              <div class="dropdown-header">Hello, {{ session.user.userName }}</div>
+              <div class="dropdown-divider"></div>
+              <a href="{{ url_for('profile') }}">Profile</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+              <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main content block: child templates should populate this -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/config')
+            .then(response => response.json())
+            .then(data => {
+                const rooms = data.rooms || {};
+                const roomContainer = document.getElementById('room-links-container');
+                roomContainer.innerHTML = ''; // Clear existing
+                if (Object.keys(rooms).length > 0) {
+                    for (const roomId in rooms) {
+                        const link = document.createElement('a');
+                        link.href = `/room/${roomId}`;
+                        link.textContent = `Room ${roomId}`;
+                        roomContainer.appendChild(link);
+                    }
+                } else {
+                    const noRooms = document.createElement('span');
+                    noRooms.textContent = 'No rooms available';
+                    noRooms.style.padding = '8px 12px';
+                    noRooms.style.display = 'block';
+                    noRooms.style.color = 'var(--muted)';
+                    roomContainer.appendChild(noRooms);
+                }
+            })
+            .catch(error => console.error('Error fetching rooms for navbar:', error));
+    });
+  </script>
+</body>
+</html>

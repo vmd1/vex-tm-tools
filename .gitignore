@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+
+# pytest cache
+.pytest_cache/
+
+# Ignore storage fields (user-specific field JSON files)
+storage/fields/*
+storage/schedule.json
+storage/notified_matches.json
+
+.vscode/
+storage/popups.json

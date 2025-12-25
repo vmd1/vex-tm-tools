@@ -1,0 +1,27 @@
+services:
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token TOKEN_REDACTED
+    networks:
+      - cf
+    restart: unless-stopped
+    
+  vex-tm-manager-tools:
+    container_name: vex-tm-manager-tools
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      cf:
+        ipv4_address: 10.65.1.20
+    volumes:
+      - ".:/srv/vtmt"
+    restart: unless-stopped
+
+networks:
+  cf:
+    name: 'cf'
+    ipam:
+     config:
+       - subnet: 10.65.1.0/24

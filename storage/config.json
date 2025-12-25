@@ -1,0 +1,29 @@
+{
+    "device_ips": {
+        "zeros": {
+            "ip": "0.0.0.0",
+            "port": 8830
+        }
+    },
+    "vex_tm_api": {
+        "client_id": "CLIENT_ID",
+        "client_secret": "CLIENT_SECRET",
+        "api_key": "API_KEY",
+        "base_url": "http://127.0.0.1",
+        "field_set_id": 1
+    },
+    "field_to_camera": {},
+    "spotify_device_id": "TM-MUSIC",
+    "websocket_endpoints": {},
+    "schedule_lead_matches": 5,
+    "match_queue_pause": {
+        "start": null,
+        "end": null
+    },
+    "paused": {
+        "video": true,
+        "audio": true,
+        "lighting": false
+    },
+    "rooms": {}
+}
